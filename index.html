@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Indian rural and urban Population</title>
+</head>
+<body>
+<script src="http://d3js.org/d3.v2.js"></script>
+<script>
+var request = new XMLHttpRequest();
+request.open("get", "First.json", false);// first json output file
+request.send();
+var jsonFile = JSON.parse(request.responseText);
+var urbanPopulation = [];
+var ruralPopulation = [];
+for(var i=0;i<jsonFile.length;i++)
+{
+  if(jsonFile[i].IndicatorCode=="SP.RUR.TOTL.ZS")
+   {
+    ruralPopulation.push(jsonFile[i]);
+  } else
+  {
+    urbanPopulation.push(jsonFile[i]);
+  }
+}
+function chart(urbanPopulation, ruralPopulation)
+ {
+  var padding = 200,width = 2000,height = 600;
+  var container = d3.select("body").append("svg").attr("width", width).attr("height", height);
+  var xAxispath = d3.scale.linear().domain([1960, 2015]).range([0,800]);
+  var xAxis = d3.svg.axis().orient("bottom").scale(xAxispath);
+  var xAxispos = container.append("g").attr("transform", "translate(200," + (height - padding +10) + ")").call(xAxis);
+  var yAxispath = d3.scale.linear().domain([100, 0]).range([0, 400]);
+  var yAxis = d3.svg.axis().orient("left").scale(yAxispath);
+  var yAxispos = container.append("g").attr("transform", "translate("+padding+",10)").call(yAxis);
+  container.append("text").attr("class", "yaxis_label").attr("transform", "translate("+ (padding/1.5) +","+(height/2)+")rotate(-90)")
+          .text("urban and rural Population");
+  container.append("text").attr("class", "xaxis_label").attr("transform", "translate("+ (width/4) +","+(height-100)+")").text("Year");
+  container.append("text").attr("transform", "translate("+ (width/3) +","+(height-500)+")").text("Rural population");
+  container.append("text").attr("transform", "translate("+ (width/3) +","+(height-320)+")").text("Urban population");
+  var urbanvalues = d3.svg.line().x(function(d)
+    {
+       return 200+(d.Year-1960)*(800/55);
+      }).y(function(d)
+      {
+        return (400-d.Value*4)+10;
+      }).interpolate("linear");
+  var ruralvalues = d3.svg.line().x(function(d)
+    {
+       return 200+(d.Year-1960)*(800/55);
+     }).y(function(d)
+      {
+         return (400-d.Value*4)+10;
+       }).interpolate("linear");
+  var urbangraph = container.append("path").attr("d", urbanvalues(urbanPopulation)).attr("stroke", "blue").attr("fill", "none");
+  var ruralgraph = container.append("path").attr("d", ruralvalues(ruralPopulation)).attr("stroke", "black").attr("fill", "none");
+  container.selectAll("circle").data(jsonFile).enter().append("circle").attr("cx", function(d)
+    {
+
+      return 200+(d.Year-1960)*(800/55);
+    }).attr("cy", function(d)
+    {
+      return (400-d.Value*4)+10;
+    }).attr("r", 5);
+
+}
+  chart(urbanPopulation, ruralPopulation);
+</script>
+</body>
+</html>
